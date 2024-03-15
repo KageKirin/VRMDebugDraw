@@ -1,0 +1,22 @@
+{
+    "name": "VRMDebugDraw",
+    "rootNamespace": "VRMDebugDraw",
+    "references": [
+        "UnityEngine.Jobs",
+        "Unity.Burst",
+        "Unity.Collections",
+        "Unity.Collections.BurstCompatibilityGen",
+        "Unity.Jobs",
+        "Unity.Mathematics",
+        "Unity.RenderPipelines.Core.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

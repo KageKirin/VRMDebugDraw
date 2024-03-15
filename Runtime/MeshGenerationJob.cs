@@ -5,6 +5,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Jobs;
 
 namespace VRMDebugDraw
@@ -13,6 +14,17 @@ namespace VRMDebugDraw
     /// owns its output structure
     public struct MeshGenerationJob : IJobParallelForTransform, IDisposable
     {
+        struct SOASlice
+        {
+            public NativeSlice<float3> vertices;
+            public NativeSlice<float3> normals;
+            public NativeSlice<float2> uvs;
+            public NativeSlice<BoneWeight> boneWeights;
+            public NativeSlice<int4> indices;
+        }
+
+        NativeArray<SOASlice> slices;
+
         NativeArray<float3> vertices;
         public readonly NativeArray<float3> Vertices
         {
@@ -146,6 +158,26 @@ namespace VRMDebugDraw
                 Transform transform = transforms[i];
                 parentPositions[i] = transform.parent != null ? transform.parent.position : math.float3(0, math.EPSILON, 0);
             }
+
+            slices = new NativeArray<SOASlice>(transforms.Length, Allocator.TempJob);
+            int sliceLength = QuadCount(lateralSubdivisions, radialSubdivisions, 1);
+            Debug.Log(
+                $"allocating {transforms.Length} slices with {sliceLength} elements each ({transforms.Length * sliceLength} elements total) "
+            );
+            for (int i = 0; i < transforms.Length; i++)
+            {
+                int baseOffset = QuadCount(lateralSubdivisions, radialSubdivisions, i);
+                Assert.IsTrue(baseOffset < quadCount);
+                Assert.IsTrue(baseOffset + sliceLength <= quadCount);
+                slices[i] = new SOASlice()
+                {
+                    vertices = new NativeSlice<float3>(this.vertices, baseOffset, sliceLength),
+                    normals = new NativeSlice<float3>(this.normals, baseOffset, sliceLength),
+                    uvs = new NativeSlice<float2>(this.uvs, baseOffset, sliceLength),
+                    boneWeights = new NativeSlice<BoneWeight>(this.boneWeights, baseOffset, sliceLength),
+                    indices = new NativeSlice<int4>(this.indices, baseOffset, sliceLength),
+                };
+            }
         }
 
         [BurstCompile]
@@ -170,26 +202,27 @@ namespace VRMDebugDraw
                 {
                     var nextRadial = (radial + 1) % radialSubdivisions;
 
-                    int currentOffset = baseOffset + QuadCount(lateral, radial, 1);
+                    int currentOffset = QuadCount(lateral, radial, 1);
 
                     // note: xzy swizzle required, but float3(float2, float) makes this easier to read
                     // note: then translate by lateral factor, here z * axis
-                    vertices[currentOffset + 0] = OffsetSwizzleAndTransformVertexToRootSpace(
+                    var currentSlice = slices[transformIndex];
+                    currentSlice.vertices[currentOffset + 0] = OffsetSwizzleAndTransformVertexToRootSpace(
                         mLocalToRoot,
                         math.float3(radius * radialPositions[nextRadial], lateralPositions[lateral]),
                         axis
                     );
-                    vertices[currentOffset + 1] = OffsetSwizzleAndTransformVertexToRootSpace(
+                    currentSlice.vertices[currentOffset + 1] = OffsetSwizzleAndTransformVertexToRootSpace(
                         mLocalToRoot,
                         math.float3(radius * radialPositions[radial], lateralPositions[lateral]),
                         axis
                     );
-                    vertices[currentOffset + 2] = OffsetSwizzleAndTransformVertexToRootSpace(
+                    currentSlice.vertices[currentOffset + 2] = OffsetSwizzleAndTransformVertexToRootSpace(
                         mLocalToRoot,
                         math.float3(radius * radialPositions[radial], lateralPositions[nextLateral]),
                         axis
                     );
-                    vertices[currentOffset + 3] = OffsetSwizzleAndTransformVertexToRootSpace(
+                    currentSlice.vertices[currentOffset + 3] = OffsetSwizzleAndTransformVertexToRootSpace(
                         mLocalToRoot,
                         math.float3(radius * radialPositions[nextRadial], lateralPositions[nextLateral]),
                         axis
@@ -197,41 +230,41 @@ namespace VRMDebugDraw
 
                     // note: xzy swizzle required as well
                     // note: normalization required as well
-                    normals[currentOffset + 0] = SwizzleAndTransformNormalToRootSpace(
+                    currentSlice.normals[currentOffset + 0] = SwizzleAndTransformNormalToRootSpace(
                         mLocalToRoot3x3,
                         math.float3(radialPositions[nextRadial], 0.0f)
                     );
-                    normals[currentOffset + 1] = SwizzleAndTransformNormalToRootSpace(
+                    currentSlice.normals[currentOffset + 1] = SwizzleAndTransformNormalToRootSpace(
                         mLocalToRoot3x3,
                         math.float3(radialPositions[radial], 0.0f)
                     );
-                    normals[currentOffset + 2] = SwizzleAndTransformNormalToRootSpace(
+                    currentSlice.normals[currentOffset + 2] = SwizzleAndTransformNormalToRootSpace(
                         mLocalToRoot3x3,
                         math.float3(radialPositions[radial], 0.0f)
                     );
-                    normals[currentOffset + 3] = SwizzleAndTransformNormalToRootSpace(
+                    currentSlice.normals[currentOffset + 3] = SwizzleAndTransformNormalToRootSpace(
                         mLocalToRoot3x3,
                         math.float3(radialPositions[nextRadial], 0.0f)
                     );
 
-                    uvs[currentOffset + 0] = math.float2(
+                    currentSlice.uvs[currentOffset + 0] = math.float2(
                         (float)(radial + 1) / (float)radialSubdivisions,
                         (float)lateral / (float)lateralSubdivisions
                     );
-                    uvs[currentOffset + 1] = math.float2(
+                    currentSlice.uvs[currentOffset + 1] = math.float2(
                         (float)(radial) / (float)radialSubdivisions,
                         (float)lateral / (float)lateralSubdivisions
                     );
-                    uvs[currentOffset + 2] = math.float2(
+                    currentSlice.uvs[currentOffset + 2] = math.float2(
                         (float)(radial) / (float)radialSubdivisions,
                         (float)(lateral + 1) / (float)lateralSubdivisions
                     );
-                    uvs[currentOffset + 3] = math.float2(
+                    currentSlice.uvs[currentOffset + 3] = math.float2(
                         (float)(radial + 1) / (float)radialSubdivisions,
                         (float)(lateral + 1) / (float)lateralSubdivisions
                     );
 
-                    boneWeights[currentOffset + 0] = new BoneWeight()
+                    currentSlice.boneWeights[currentOffset + 0] = new BoneWeight()
                     {
                         boneIndex0 = transformIndex,
                         boneIndex1 = 0,
@@ -242,7 +275,7 @@ namespace VRMDebugDraw
                         weight2 = 0,
                         weight3 = 0,
                     };
-                    boneWeights[currentOffset + 1] = new BoneWeight()
+                    currentSlice.boneWeights[currentOffset + 1] = new BoneWeight()
                     {
                         boneIndex0 = transformIndex,
                         boneIndex1 = 0,
@@ -253,7 +286,7 @@ namespace VRMDebugDraw
                         weight2 = 0,
                         weight3 = 0,
                     };
-                    boneWeights[currentOffset + 2] = new BoneWeight()
+                    currentSlice.boneWeights[currentOffset + 2] = new BoneWeight()
                     {
                         boneIndex0 = transformIndex,
                         boneIndex1 = 0,
@@ -264,7 +297,7 @@ namespace VRMDebugDraw
                         weight2 = 0,
                         weight3 = 0,
                     };
-                    boneWeights[currentOffset + 3] = new BoneWeight()
+                    currentSlice.boneWeights[currentOffset + 3] = new BoneWeight()
                     {
                         boneIndex0 = transformIndex,
                         boneIndex1 = 0,
@@ -276,11 +309,11 @@ namespace VRMDebugDraw
                         weight3 = 0,
                     };
 
-                    indices[currentOffset] = math.int4( //
-                        currentOffset + 0,
-                        currentOffset + 1,
-                        currentOffset + 2,
-                        currentOffset + 3
+                    currentSlice.indices[currentOffset] = math.int4(
+                        baseOffset + currentOffset + 0,
+                        baseOffset + currentOffset + 1,
+                        baseOffset + currentOffset + 2,
+                        baseOffset + currentOffset + 3
                     );
                 }
             }

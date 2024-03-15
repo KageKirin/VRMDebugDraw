@@ -19,20 +19,5 @@ namespace VRMDebugDraw
 
             return component;
         }
-
-        public static GameObject GetOrAddChildObject(this GameObject gameObject, string childName)
-        {
-            var transforms = gameObject.GetComponentsInChildren<Transform>(true);
-            int childIndex = Array.FindIndex(transforms, t => t.name == childName);
-
-            if (childIndex >= 0)
-            {
-                return transforms[childIndex].gameObject;
-            }
-
-            GameObject child = new(childName);
-            child.transform.parent = gameObject.transform;
-            return child;
-        }
     }
 }

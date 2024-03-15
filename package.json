@@ -1,0 +1,36 @@
+{
+    "name": "com.kagekirin.vrmdebugdraw",
+    "version": "0.0.0-0",
+    "displayName": "VRM Debug Draw",
+    "description": "Runtime debug drawer for (Uni)VRM assets",
+    "unity": "2022.3",
+    "files": [
+      "**.meta",
+      "**.md",
+      "**.cs"
+    ],
+    "dependencies": {
+      "com.cysharp.csprojmodifier": "1.2.1",
+      "com.unity.burst": "1.7.3",
+      "com.unity.collections": "1.4.0",
+      "com.unity.render-pipelines.universal": "12.1.6"
+    },
+    "keywords": [
+      "vrm",
+      "debug"
+    ],
+    "author": {
+      "name": "Chris 'KageKirin' Helmich",
+      "email": "kagekirin@gmail.com",
+      "url": "https://github.com/kagekirin"
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/kagekirin/VRMDebugDraw.git",
+      "directory": "com.kagekirin.vrmdebugdraw"
+    },
+    "publishConfig": {
+      "registry": "https://npm.github.com/@kagekirin"
+    }
+  }
+  

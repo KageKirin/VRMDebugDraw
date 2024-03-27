@@ -1,4 +1,9 @@
 using System;
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using Unity.Collections;
 using UnityEngine;
 
 namespace VRMDebugDraw
@@ -33,6 +38,13 @@ namespace VRMDebugDraw
             GameObject child = new(childName);
             child.transform.parent = gameObject.transform;
             return child;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static NativeArray<T0> ToNativeArray<T0>(this T0[] list, Allocator allocator)
+            where T0 : struct
+        {
+            return new NativeArray<T0>(list, allocator);
         }
     }
 }

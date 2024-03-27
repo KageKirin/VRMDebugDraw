@@ -76,50 +76,7 @@ namespace VRMDebugDraw
         float4x4 mWorldToRootSpace;
 
         [ReadOnly]
-        float radius;
-
-        [ReadOnly]
-        int lateralSubdivisions;
-
-        [ReadOnly]
-        int radialSubdivisions;
-
-        [ReadOnly]
-        NativeArray<float> lateralPositions;
-
-        [ReadOnly]
-        NativeArray<float2> radialPositions;
-
-        [BurstCompile, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int QuadCount(int lateralSubdivisions, int radialSubdivisions, int offset) =>
-            lateralSubdivisions * radialSubdivisions * 4 * offset;
-
-        [BurstCompile, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static float ComputeTauBySubdivisions(int subdivisions) => 2 * math.PI / (float)subdivisions;
-
-        [BurstCompile, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static float2[] ComputeRadialPositions(int subdivisions)
-        {
-            float tauBySubdiv = ComputeTauBySubdivisions(subdivisions);
-            float2[] positions = new float2[subdivisions];
-            for (int i = 0; i < subdivisions; i++)
-            {
-                float angleI = tauBySubdiv * (float)i;
-                positions[i] = math.float2(math.sin(angleI), math.cos(angleI));
-            }
-            return positions;
-        }
-
-        [BurstCompile, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static float[] ComputeLateralPositions(int subdivisions)
-        {
-            float[] positions = new float[subdivisions + 1];
-            for (int i = 0; i < subdivisions + 1; i++)
-            {
-                positions[i] = (float)i / (float)subdivisions;
-            }
-            return positions;
-        }
+        MeshGeneration.Segment segment;
 
         // offset, swizzle and transform quadVertices to rootSpace
         [BurstCompile, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -136,27 +93,23 @@ namespace VRMDebugDraw
             return math.mul(mLocalToRoot3x3, math.normalize(normal.xzy));
         }
 
-        public MeshGenerationJob(
-            float4x4 mWorldToRootSpace,
-            float radius,
-            int lateralSubdivisions,
-            int radialSubdivisions,
-            Transform[] transforms
-        )
+        public MeshGenerationJob(float4x4 mWorldToRootSpace, MeshGeneration.Segment segment, Transform[] transforms)
         {
             this.mWorldToRootSpace = mWorldToRootSpace;
-            this.radius = radius;
-            this.lateralSubdivisions = lateralSubdivisions;
-            this.radialSubdivisions = radialSubdivisions;
-            lateralPositions = new NativeArray<float>(ComputeLateralPositions(lateralSubdivisions), Allocator.TempJob);
-            radialPositions = new NativeArray<float2>(ComputeRadialPositions(radialSubdivisions), Allocator.TempJob);
+            this.segment = segment;
 
-            int quadCount = QuadCount(lateralSubdivisions, radialSubdivisions, transforms.Length);
-            vertices = new NativeArray<float3>(quadCount, Allocator.TempJob);
-            normals = new NativeArray<float3>(quadCount, Allocator.TempJob);
-            uvs = new NativeArray<float2>(quadCount, Allocator.TempJob);
-            boneWeights = new NativeArray<BoneWeight>(quadCount, Allocator.TempJob);
-            indices = new NativeArray<int4>(quadCount / 4, Allocator.TempJob);
+            Debug.Log($"{transforms.Length} transforms");
+
+            Assert.AreEqual(segment.vertices.Length, segment.normals.Length);
+            Assert.AreEqual(segment.vertices.Length, segment.texcoords.Length);
+            Assert.AreEqual(segment.vertices.Length, segment.colors.Length);
+
+            vertices = new NativeArray<float3>(segment.vertices.Length * transforms.Length, Allocator.TempJob);
+            normals = new NativeArray<float3>(segment.normals.Length * transforms.Length, Allocator.TempJob);
+            texcoords = new NativeArray<float2>(segment.texcoords.Length * transforms.Length, Allocator.TempJob);
+            colors = new NativeArray<float4>(segment.colors.Length * transforms.Length, Allocator.TempJob);
+            boneWeights = new NativeArray<BoneWeight>(segment.vertices.Length * transforms.Length, Allocator.TempJob);
+            indices = new NativeArray<int4>(segment.indices.Length * transforms.Length, Allocator.TempJob);
             bindPoses = new NativeArray<float4x4>(transforms.Length, Allocator.TempJob);
 
             parentPositions = new NativeArray<float3>(transforms.Length, Allocator.TempJob);
@@ -167,22 +120,27 @@ namespace VRMDebugDraw
             }
 
             slices = new NativeArray<SOASlice>(transforms.Length, Allocator.TempJob);
-            int sliceLength = QuadCount(lateralSubdivisions, radialSubdivisions, 1);
-            Debug.Log(
-                $"allocating {transforms.Length} slices with {sliceLength} elements each ({transforms.Length * sliceLength} elements total) "
-            );
             for (int i = 0; i < transforms.Length; i++)
             {
-                int baseOffset = QuadCount(lateralSubdivisions, radialSubdivisions, i);
-                Assert.IsTrue(baseOffset < quadCount);
-                Assert.IsTrue(baseOffset + sliceLength <= quadCount);
+                var _vertices = new NativeSlice<float3>(this.vertices, segment.vertices.Length * i, segment.vertices.Length);
+                var _normals = new NativeSlice<float3>(this.normals, segment.normals.Length * i, segment.normals.Length);
+                var _texcoords = new NativeSlice<float2>(this.texcoords, segment.texcoords.Length * i, segment.texcoords.Length);
+                var _colors = new NativeSlice<float4>(this.colors, segment.colors.Length * i, segment.colors.Length);
+                var _boneWeights = new NativeSlice<BoneWeight>(
+                    this.boneWeights,
+                    segment.vertices.Length * i,
+                    segment.vertices.Length
+                );
+                var _indices = new NativeSlice<int4>(this.indices, segment.indices.Length * i, segment.indices.Length);
+
                 slices[i] = new SOASlice()
                 {
-                    vertices = new NativeSlice<float3>(this.vertices, baseOffset, sliceLength),
-                    normals = new NativeSlice<float3>(this.normals, baseOffset, sliceLength),
-                    uvs = new NativeSlice<float2>(this.uvs, baseOffset, sliceLength),
-                    boneWeights = new NativeSlice<BoneWeight>(this.boneWeights, baseOffset, sliceLength),
-                    indices = new NativeSlice<int4>(this.indices, baseOffset, sliceLength),
+                    vertices = _vertices,
+                    normals = _normals,
+                    texcoords = _texcoords,
+                    colors = _colors,
+                    boneWeights = _boneWeights,
+                    indices = _indices,
                 };
             }
         }
@@ -190,7 +148,6 @@ namespace VRMDebugDraw
         [BurstCompile]
         public void Execute(int transformIndex, TransformAccess transform)
         {
-            int baseOffset = QuadCount(lateralSubdivisions, radialSubdivisions, transformIndex);
             float4x4 mWorldToLocal = transform.worldToLocalMatrix;
             float4x4 mLocalToRoot = math.mul(mWorldToRootSpace, transform.localToWorldMatrix);
             float3x3 mLocalToRoot3x3 = math.float3x3(mLocalToRoot);
@@ -199,130 +156,37 @@ namespace VRMDebugDraw
             float3 parentPositionInLocalSpace = math.mul(mWorldToLocal, math.float4(parentPositions[transformIndex], 1.0f)).xyz;
             float3 axis = parentPositionInLocalSpace - localPositionInLocalSpace; //or basically parentPositionInLocalSpace
 
+            BoneWeight bw =
+                new()
+                {
+                    boneIndex0 = transformIndex,
+                    boneIndex1 = 0,
+                    boneIndex2 = 0,
+                    boneIndex3 = 0,
+                    weight0 = 1,
+                    weight1 = 0,
+                    weight2 = 0,
+                    weight3 = 0,
+                };
+
+            // assign transformed vertices/normals
+            // copy texcoords, colors
+            // assign boneweights
+            for (int i = 0; i < segment.vertices.Length; i++)
+            {
+                vertices[i] = OffsetSwizzleAndTransformVertexToRootSpace(mLocalToRoot, segment.vertices[i], axis);
+                normals[i] = SwizzleAndTransformNormalToRootSpace(mLocalToRoot3x3, segment.normals[i]);
+                texcoords[i] = segment.texcoords[i];
+                colors[i] = segment.colors[i];
+                boneWeights[i] = bw;
+            }
+
             bindPoses[transformIndex] = (float4x4)transform.worldToLocalMatrix * mWorldToRootSpace;
 
-            for (int lateral = 0; lateral < lateralSubdivisions; lateral++)
+            // assign offset indices
+            for (int i = 0; i < segment.indices.Length; i++)
             {
-                var nextLateral = lateral + 1; //< safe since we have lateralSubdivisions+1 values
-
-                for (int radial = 0; radial < radialSubdivisions; radial++)
-                {
-                    var nextRadial = (radial + 1) % radialSubdivisions;
-
-                    int currentOffset = QuadCount(lateral, radial, 1);
-
-                    // note: xzy swizzle required, but float3(float2, float) makes this easier to read
-                    // note: then translate by lateral factor, here z * axis
-                    var currentSlice = slices[transformIndex];
-                    currentSlice.vertices[currentOffset + 0] = OffsetSwizzleAndTransformVertexToRootSpace(
-                        mLocalToRoot,
-                        math.float3(radius * radialPositions[nextRadial], lateralPositions[lateral]),
-                        axis
-                    );
-                    currentSlice.vertices[currentOffset + 1] = OffsetSwizzleAndTransformVertexToRootSpace(
-                        mLocalToRoot,
-                        math.float3(radius * radialPositions[radial], lateralPositions[lateral]),
-                        axis
-                    );
-                    currentSlice.vertices[currentOffset + 2] = OffsetSwizzleAndTransformVertexToRootSpace(
-                        mLocalToRoot,
-                        math.float3(radius * radialPositions[radial], lateralPositions[nextLateral]),
-                        axis
-                    );
-                    currentSlice.vertices[currentOffset + 3] = OffsetSwizzleAndTransformVertexToRootSpace(
-                        mLocalToRoot,
-                        math.float3(radius * radialPositions[nextRadial], lateralPositions[nextLateral]),
-                        axis
-                    );
-
-                    // note: xzy swizzle required as well
-                    // note: normalization required as well
-                    currentSlice.normals[currentOffset + 0] = SwizzleAndTransformNormalToRootSpace(
-                        mLocalToRoot3x3,
-                        math.float3(radialPositions[nextRadial], 0.0f)
-                    );
-                    currentSlice.normals[currentOffset + 1] = SwizzleAndTransformNormalToRootSpace(
-                        mLocalToRoot3x3,
-                        math.float3(radialPositions[radial], 0.0f)
-                    );
-                    currentSlice.normals[currentOffset + 2] = SwizzleAndTransformNormalToRootSpace(
-                        mLocalToRoot3x3,
-                        math.float3(radialPositions[radial], 0.0f)
-                    );
-                    currentSlice.normals[currentOffset + 3] = SwizzleAndTransformNormalToRootSpace(
-                        mLocalToRoot3x3,
-                        math.float3(radialPositions[nextRadial], 0.0f)
-                    );
-
-                    currentSlice.uvs[currentOffset + 0] = math.float2(
-                        (float)(radial + 1) / (float)radialSubdivisions,
-                        (float)lateral / (float)lateralSubdivisions
-                    );
-                    currentSlice.uvs[currentOffset + 1] = math.float2(
-                        (float)(radial) / (float)radialSubdivisions,
-                        (float)lateral / (float)lateralSubdivisions
-                    );
-                    currentSlice.uvs[currentOffset + 2] = math.float2(
-                        (float)(radial) / (float)radialSubdivisions,
-                        (float)(lateral + 1) / (float)lateralSubdivisions
-                    );
-                    currentSlice.uvs[currentOffset + 3] = math.float2(
-                        (float)(radial + 1) / (float)radialSubdivisions,
-                        (float)(lateral + 1) / (float)lateralSubdivisions
-                    );
-
-                    currentSlice.boneWeights[currentOffset + 0] = new BoneWeight()
-                    {
-                        boneIndex0 = transformIndex,
-                        boneIndex1 = 0,
-                        boneIndex2 = 0,
-                        boneIndex3 = 0,
-                        weight0 = 1,
-                        weight1 = 0,
-                        weight2 = 0,
-                        weight3 = 0,
-                    };
-                    currentSlice.boneWeights[currentOffset + 1] = new BoneWeight()
-                    {
-                        boneIndex0 = transformIndex,
-                        boneIndex1 = 0,
-                        boneIndex2 = 0,
-                        boneIndex3 = 0,
-                        weight0 = 1,
-                        weight1 = 0,
-                        weight2 = 0,
-                        weight3 = 0,
-                    };
-                    currentSlice.boneWeights[currentOffset + 2] = new BoneWeight()
-                    {
-                        boneIndex0 = transformIndex,
-                        boneIndex1 = 0,
-                        boneIndex2 = 0,
-                        boneIndex3 = 0,
-                        weight0 = 1,
-                        weight1 = 0,
-                        weight2 = 0,
-                        weight3 = 0,
-                    };
-                    currentSlice.boneWeights[currentOffset + 3] = new BoneWeight()
-                    {
-                        boneIndex0 = transformIndex,
-                        boneIndex1 = 0,
-                        boneIndex2 = 0,
-                        boneIndex3 = 0,
-                        weight0 = 1,
-                        weight1 = 0,
-                        weight2 = 0,
-                        weight3 = 0,
-                    };
-
-                    currentSlice.indices[currentOffset] = math.int4(
-                        baseOffset + currentOffset + 0,
-                        baseOffset + currentOffset + 1,
-                        baseOffset + currentOffset + 2,
-                        baseOffset + currentOffset + 3
-                    );
-                }
+                indices[i] = segment.indices.Length * transformIndex + i;
             }
         }
 
@@ -336,9 +200,6 @@ namespace VRMDebugDraw
             indices.Dispose();
             bindPoses.Dispose();
             parentPositions.Dispose();
-
-            lateralPositions.Dispose();
-            radialPositions.Dispose();
         }
     }
 }

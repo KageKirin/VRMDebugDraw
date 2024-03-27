@@ -63,8 +63,9 @@ namespace VRMDebugDraw
 
             Transform[] transforms = gameObject.GetComponentsInChildren<Transform>(); //< iterates depth-first
 
+            using var segmentFactory = new MeshGeneration.CylinderSegmentFactory(radius, 1.0f, radialSubdivisions, lateralSubdivisions);
             MeshGenerationJob meshGenerationJob =
-                new(transforms[0].localToWorldMatrix, radius, lateralSubdivisions, radialSubdivisions, transforms);
+                new(transforms[0].localToWorldMatrix, segmentFactory.GenerateSegment(), transforms);
             {
                 var jobCount = 16;
                 var jh_meshGenerationJob = meshGenerationJob.ScheduleReadOnlyByRef(

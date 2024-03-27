@@ -75,7 +75,7 @@ namespace VRMDebugDraw
 
                 mesh.SetVertices(meshGenerationJob.Vertices);
                 mesh.SetNormals(meshGenerationJob.Normals);
-                mesh.SetUVs(0, meshGenerationJob.Uvs);
+                mesh.SetUVs(0, meshGenerationJob.TexCoords);
                 mesh.boneWeights = meshGenerationJob.BoneWeights.ToArray();
 
                 mesh.SetIndices(

@@ -18,7 +18,7 @@ namespace VRMDebugDraw
         {
             public NativeSlice<float3> vertices;
             public NativeSlice<float3> normals;
-            public NativeSlice<float2> uvs;
+            public NativeSlice<float2> texcoords;
             public NativeSlice<BoneWeight> boneWeights;
             public NativeSlice<int4> indices;
         }
@@ -37,10 +37,10 @@ namespace VRMDebugDraw
             get => normals;
         }
 
-        NativeArray<float2> uvs;
-        public readonly NativeArray<float2> Uvs
+        NativeArray<float2> texcoords;
+        public readonly NativeArray<float2> TexCoords
         {
-            get => uvs;
+            get => texcoords;
         }
 
         NativeArray<BoneWeight> boneWeights;
@@ -323,7 +323,7 @@ namespace VRMDebugDraw
         {
             vertices.Dispose();
             normals.Dispose();
-            uvs.Dispose();
+            texcoords.Dispose();
             boneWeights.Dispose();
             indices.Dispose();
             bindPoses.Dispose();

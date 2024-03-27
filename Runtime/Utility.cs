@@ -46,5 +46,12 @@ namespace VRMDebugDraw
         {
             return new NativeArray<T0>(list, allocator);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static NativeArray<T0> ToNativeArray<T0>(this IEnumerable<T0> list, Allocator allocator)
+            where T0 : struct
+        {
+            return list.ToArray().ToNativeArray(allocator);
+        }
     }
 }

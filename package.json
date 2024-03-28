@@ -1,6 +1,6 @@
 {
   "name": "com.kagekirin.vrmdebugdraw",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "displayName": "VRM Debug Draw",
   "description": "Runtime debug drawer for (Uni)VRM assets",
   "unity": "2022.3",

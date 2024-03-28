@@ -10,6 +10,13 @@ inputs:
     default: ${{ github.repository_owner }}
   token:
     required: true
+outputs:
+  package:
+    description: package name (without path)
+    value: ${{ steps.npm-pack.outputs.package }}
+  package-full:
+    description: package name with path
+    value: ${{ steps.npm-pack.outputs.package_full }}
 runs:
   using: composite
   steps:

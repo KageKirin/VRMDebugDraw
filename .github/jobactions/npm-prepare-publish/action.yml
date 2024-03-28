@@ -10,6 +10,13 @@ inputs:
     default: ${{ github.repository_owner }}
   token:
     required: true
+outputs:
+  package:
+    description: package name (without path)
+    value: ${{ steps.npm-pack.outputs.package }}
+  package-full:
+    description: package name with path
+    value: ${{ steps.npm-pack.outputs.package_full }}
 runs:
   using: composite
   steps:
@@ -22,9 +29,11 @@ runs:
       token: ${{ inputs.token }}
   - uses: ./.github/jobactions/build
     with:
-      framework: net8.0
+      unity: 2022.3
       configuration: Release
-      exclude: Prototype
-  - uses: kagekirin/gha-npm/.github/actions/npm-pack@main
+  - id: npm-pack
+    uses: kagekirin/gha-npm/.github/actions/npm-pack@main
     with:
-      framework: net8.0
+      path: ${{ github.workspace }}
+      spec: package.json
+      outdir: ./

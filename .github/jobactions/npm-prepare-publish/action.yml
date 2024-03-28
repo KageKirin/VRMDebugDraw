@@ -16,7 +16,7 @@ outputs:
     value: ${{ steps.npm-pack.outputs.package }}
   package-full:
     description: package name with path
-    value: ${{ steps.npm-pack.outputs.package_full }}
+    value: ${{ steps.npm-pack.outputs.package-full }}
 runs:
   using: composite
   steps:
@@ -40,4 +40,4 @@ runs:
   - shell: pwsh
     run: |-
       echo "steps.npm-pack.outputs.package: ${{ steps.npm-pack.outputs.package }}"
-      echo "steps.npm-pack.outputs.package_full: ${{ steps.npm-pack.outputs.package_full }}"
+      echo "steps.npm-pack.outputs.package-full: ${{ steps.npm-pack.outputs.package-full }}"

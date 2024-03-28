@@ -14,38 +14,38 @@ namespace VRMDebugDraw
     public struct MeshGenerationJob : IJobParallelForTransform, IDisposable
     {
         NativeArray<float3> vertices;
-        public NativeArray<float3> Vertices
+        public readonly NativeArray<float3> Vertices
         {
             get => vertices;
         }
 
         NativeArray<float3> normals;
-        public NativeArray<float3> Normals
+        public readonly NativeArray<float3> Normals
         {
             get => normals;
         }
 
         NativeArray<float2> uvs;
-        public NativeArray<float2> Uvs
+        public readonly NativeArray<float2> Uvs
         {
             get => uvs;
         }
 
         NativeArray<BoneWeight> boneWeights;
-        public NativeArray<BoneWeight> BoneWeights
+        public readonly NativeArray<BoneWeight> BoneWeights
         {
             get => boneWeights;
         }
 
         // quads => int4
         NativeArray<int4> indices;
-        public NativeArray<int4> Indices
+        public readonly NativeArray<int4> Indices
         {
             get => indices;
         }
 
         NativeArray<float4x4> bindPoses;
-        public NativeArray<float4x4> BindPoses
+        public readonly NativeArray<float4x4> BindPoses
         {
             get => bindPoses;
         }

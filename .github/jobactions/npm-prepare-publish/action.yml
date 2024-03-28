@@ -1,0 +1,30 @@
+name: jobactions/npm-prepare-publish
+inputs:
+  name:
+    required: true
+  registry:
+    required: false
+    default: https://npm.pkg.github.com/${{ github.repository_owner }}/index.json
+  username:
+    required: false
+    default: ${{ github.repository_owner }}
+  token:
+    required: true
+runs:
+  using: composite
+  steps:
+  - uses: kagekirin/gha-utils/.github/actions/install-prerequisites@main
+  - uses: kagekirin/gha-npm/.github/actions/npm-add-registry@main
+    with:
+      name: ${{ inputs.name }}
+      registry: ${{ inputs.registry }}
+      username: ${{ inputs.username }}
+      token: ${{ inputs.token }}
+  - uses: ./.github/jobactions/build
+    with:
+      framework: net8.0
+      configuration: Release
+      exclude: Prototype
+  - uses: kagekirin/gha-npm/.github/actions/npm-pack@main
+    with:
+      framework: net8.0

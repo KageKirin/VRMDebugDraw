@@ -24,6 +24,9 @@ runs:
     with:
       unity: 2022.3
       configuration: Release
-  - uses: kagekirin/gha-npm/.github/actions/npm-pack@main
+  - id: npm-pack
+    uses: kagekirin/gha-npm/.github/actions/npm-pack@main
     with:
-      framework: net8.0
+      path: ${{ github.workspace }}
+      spec: package.json
+      outdir: ./

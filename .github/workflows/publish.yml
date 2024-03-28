@@ -1,0 +1,35 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  npm:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        source: [npmjs, github]
+        include:
+          - source: npmjs
+            registry: https://registry.npmjs.org/@${{ github.repository_owner }}
+            username: ${{ github.repository_owner }}
+            token: NPMJS_ORG_TOKEN
+          - source: github
+            registry: https://npm.pkg.github.com/@${{ github.repository_owner }}
+            username: ${{ github.repository_owner }}
+            token: GH_NPM_TOKEN
+    steps:
+    - uses: kagekirin/gha-utils/.github/actions/git-checkout-tags@main
+    - uses: ./.github/jobactions/npm-prepare-publish
+      with:
+        name: ${{ matrix.source }}
+        registry: ${{ matrix.registry }}
+        username: ${{ matrix.username }}
+        token: ${{ secrets[matrix.token] }}
+    - uses: kagekirin/gha-npm/.github/actions/npm-publish@main
+      with:
+        registry: ${{ matrix.registry }}
+        token: ${{ secrets[matrix.token] }}
+        dry-run: false

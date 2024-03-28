@@ -17,7 +17,7 @@ jobs:
             username: ${{ github.repository_owner }}
             token: NPMJS_ORG_TOKEN
           - source: github
-            registry: https://npm.pkg.github.com/@${{ github.repository_owner }}
+            registry: https://npm.github.com/@${{ github.repository_owner }}
             username: ${{ github.repository_owner }}
             token: GH_NPM_TOKEN
     steps:

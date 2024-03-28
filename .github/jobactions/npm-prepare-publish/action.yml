@@ -22,9 +22,8 @@ runs:
       token: ${{ inputs.token }}
   - uses: ./.github/jobactions/build
     with:
-      framework: net8.0
+      unity: 2022.3
       configuration: Release
-      exclude: Prototype
   - uses: kagekirin/gha-npm/.github/actions/npm-pack@main
     with:
       framework: net8.0

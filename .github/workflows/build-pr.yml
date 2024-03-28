@@ -64,6 +64,10 @@ jobs:
         registry: ${{ matrix.registry }}
         username: ${{ matrix.username }}
         token: ${{ secrets[matrix.token] }}
+    - shell: pwsh
+      run: |-
+        echo "steps.npm-prepare-publish.outputs.package: ${{ steps.npm-prepare-publish.outputs.package }}"
+        echo "steps.npm-prepare-publish.outputs.package_full: ${{ steps.npm-prepare-publish.outputs.package_full }}"
     - uses: kagekirin/gha-npm/.github/actions/npm-publish-package@main
       with:
         registry: ${{ matrix.registry }}

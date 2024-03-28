@@ -6,6 +6,35 @@ on:
       - '*'
 
 jobs:
+  test-npm:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        source: [npmjs, github]
+        include:
+          - source: npmjs
+            registry: https://registry.npmjs.org/@${{ github.repository_owner }}
+            username: ${{ github.repository_owner }}
+            token: NPMJS_ORG_TOKEN
+          - source: github
+            registry: https://npm.github.com/@${{ github.repository_owner }}
+            username: ${{ github.repository_owner }}
+            token: GH_NPM_TOKEN
+    steps:
+    - uses: kagekirin/gha-utils/.github/actions/git-checkout-tags@main
+    - id: npm-prepare-publish
+      uses: ./.github/jobactions/npm-prepare-publish
+      with:
+        name: ${{ matrix.source }}
+        registry: ${{ matrix.registry }}
+        username: ${{ matrix.username }}
+        token: ${{ secrets[matrix.token] }}
+    - uses: kagekirin/gha-npm/.github/actions/npm-publish-package@main
+      with:
+        registry: ${{ matrix.registry }}
+        package: ${{ steps.npm-prepare-publish.outputs.package_full }}
+        dry-run: true
+
   npm:
     runs-on: ubuntu-latest
     strategy:
@@ -20,6 +49,7 @@ jobs:
             registry: https://npm.github.com/@${{ github.repository_owner }}
             username: ${{ github.repository_owner }}
             token: GH_NPM_TOKEN
+    needs: test-npm
     steps:
     - uses: kagekirin/gha-utils/.github/actions/git-checkout-tags@main
     - id: npm-prepare-publish

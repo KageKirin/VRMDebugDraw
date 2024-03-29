@@ -7,7 +7,8 @@
   "files": [
     "**/*.meta",
     "**/*.md",
-    "**/*.cs"
+    "**/*.cs",
+    "**/*.asmdef"
   ],
   "dependencies": {
     "com.cysharp.csprojmodifier": "1.2.1",

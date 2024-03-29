@@ -5,9 +5,11 @@
   "description": "Runtime debug drawer for (Uni)VRM assets",
   "unity": "2022.3",
   "files": [
-    "**.meta",
-    "**.md",
-    "**.cs"
+    "**/*.meta",
+    "**/*.md",
+    "**/*.cs",
+    "**/*.asmdef",
+    "**/*.mat"
   ],
   "dependencies": {
     "com.cysharp.csprojmodifier": "1.2.1",

@@ -59,10 +59,9 @@ jobs:
       with:
         name: ${{ matrix.source }}
         registry: ${{ matrix.registry }}
-        username: ${{ matrix.username }}
         token: ${{ secrets[matrix.token] }}
     - uses: kagekirin/gha-npm/.github/actions/npm-publish-package@main
       with:
         registry: ${{ matrix.registry }}
-        package: ${{ steps.npm-prepare-publish.outputs.package_full }}
+        package: ${{ steps.npm-prepare-publish.outputs.package-full }}
         dry-run: true

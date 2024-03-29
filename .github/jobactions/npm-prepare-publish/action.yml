@@ -5,9 +5,6 @@ inputs:
   registry:
     required: false
     default: https://npm.pkg.github.com/${{ github.repository_owner }}/index.json
-  username:
-    required: false
-    default: ${{ github.repository_owner }}
   token:
     required: true
 outputs:
@@ -16,7 +13,7 @@ outputs:
     value: ${{ steps.npm-pack.outputs.package }}
   package-full:
     description: package name with path
-    value: ${{ steps.npm-pack.outputs.package_full }}
+    value: ${{ steps.npm-pack.outputs.package-full }}
 runs:
   using: composite
   steps:
@@ -25,7 +22,6 @@ runs:
     with:
       name: ${{ inputs.name }}
       registry: ${{ inputs.registry }}
-      username: ${{ inputs.username }}
       token: ${{ inputs.token }}
   - uses: ./.github/jobactions/build
     with:

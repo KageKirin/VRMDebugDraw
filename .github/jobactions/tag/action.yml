@@ -41,6 +41,7 @@ runs:
       echo "Version: $version"
 
       node-package-version set --version $version package.json
+      npm pkg fix
       git commit -am "tag: v$version"
       git tag -f v$version
 

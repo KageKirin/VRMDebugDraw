@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        source: [npmjs, github]
+        source: [github] #npmjs,
         include:
           - source: npmjs
             registry: https://registry.npmjs.org/@${{ github.repository_owner }}

@@ -27,7 +27,6 @@ jobs:
       with:
         name: ${{ matrix.source }}
         registry: ${{ matrix.registry }}
-        username: ${{ matrix.username }}
         token: ${{ secrets[matrix.token] }}
     - uses: kagekirin/gha-npm/.github/actions/npm-publish-package@main
       with:
@@ -57,7 +56,6 @@ jobs:
       with:
         name: ${{ matrix.source }}
         registry: ${{ matrix.registry }}
-        username: ${{ matrix.username }}
         token: ${{ secrets[matrix.token] }}
     - uses: kagekirin/gha-npm/.github/actions/npm-publish-package@main
       with:

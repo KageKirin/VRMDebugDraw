@@ -30,6 +30,6 @@
     "directory": "com.kagekirin.vrmdebugdraw"
   },
   "publishConfig": {
-    "registry": "https://npm.github.com/@kagekirin"
+    "registry": "https://npm.pkg.github.com/@kagekirin"
   }
 }

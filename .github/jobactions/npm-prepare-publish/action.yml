@@ -13,7 +13,7 @@ outputs:
     value: ${{ steps.npm-pack.outputs.package }}
   package-full:
     description: package name with path
-    value: ${{ steps.npm-pack.outputs.package_full }}
+    value: ${{ steps.npm-pack.outputs.package-full }}
 runs:
   using: composite
   steps:

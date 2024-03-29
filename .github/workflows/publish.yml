@@ -40,10 +40,10 @@ jobs:
       matrix:
         source: [github] #npmjs,
         include:
-          - source: npmjs
-            registry: https://registry.npmjs.org/@${{ github.repository_owner }}
-            username: ${{ github.repository_owner }}
-            token: NPMJS_ORG_TOKEN
+          #- source: npmjs
+          #  registry: https://registry.npmjs.org/@${{ github.repository_owner }}
+          #  username: ${{ github.repository_owner }}
+          #  token: NPMJS_ORG_TOKEN
           - source: github
             registry: https://npm.pkg.github.com/@${{ github.repository_owner }}
             username: ${{ github.repository_owner }}

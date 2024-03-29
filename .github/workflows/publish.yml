@@ -10,12 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        source: [npmjs, github]
+        source: [github]
         include:
-          - source: npmjs
-            registry: https://registry.npmjs.org/@${{ github.repository_owner }}
-            username: ${{ github.repository_owner }}
-            token: NPMJS_ORG_TOKEN
           - source: github
             registry: https://npm.pkg.github.com/@${{ github.repository_owner }}
             username: ${{ github.repository_owner }}
@@ -38,12 +34,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        source: [npmjs, github]
+        source: [github]
         include:
-          - source: npmjs
-            registry: https://registry.npmjs.org/@${{ github.repository_owner }}
-            username: ${{ github.repository_owner }}
-            token: NPMJS_ORG_TOKEN
           - source: github
             registry: https://npm.pkg.github.com/@${{ github.repository_owner }}
             username: ${{ github.repository_owner }}

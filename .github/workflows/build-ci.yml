@@ -68,7 +68,7 @@ jobs:
     - uses: kagekirin/gha-npm/.github/actions/npm-publish-package@main
       with:
         registry: ${{ matrix.registry }}
-        package: ${{ steps.npm-prepare-publish.outputs.package_full }}
+        package: ${{ steps.npm-prepare-publish.outputs.package-full }}
         dry-run: true
 
   tag:

@@ -8,7 +8,8 @@
     "**/*.meta",
     "**/*.md",
     "**/*.cs",
-    "**/*.asmdef"
+    "**/*.asmdef",
+    "**/*.mat"
   ],
   "dependencies": {
     "com.cysharp.csprojmodifier": "1.2.1",

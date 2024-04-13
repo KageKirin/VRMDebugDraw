@@ -54,8 +54,8 @@ jobs:
     - id: npm-prepare-publish
       uses: ./.github/jobactions/npm-prepare-publish
       with:
-        name: ${{ matrix.source }}
-        registry: ${{ matrix.registry }}
+        registry-url: ${{ matrix.registry-url }}
+        scope: ${{ matrix.scope }}
         token: ${{ secrets[matrix.token] }}
     - uses: kagekirin/gha-npm/.github/actions/npm-publish-package@main
       with:

@@ -5,10 +5,18 @@ description: >
 
 inputs:
   registry-url:
+    description: Full registry URL (starting from https://) without scope
+    type: string
     required: false
-    default: https://npm.pkg.github.com/${{ github.repository_owner }}/index.json
+    default: https://npm.pkg.github.com/
+  scope:
+    description: User/Organization scope
+    type: string
+    required: false
+    default: '@${{ github.repository_owner }}'
   token:
     required: true
+
 outputs:
   package:
     description: package name (without path)
@@ -16,6 +24,7 @@ outputs:
   package-full:
     description: package name with path
     value: ${{ steps.npm-pack.outputs.package-full }}
+
 runs:
   using: composite
   steps:

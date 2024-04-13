@@ -4,8 +4,6 @@ description: >
   Sets up .npmrc and patches package.json with correct registry.
 
 inputs:
-  name:
-    required: true
   registry:
     required: false
     default: https://npm.pkg.github.com/${{ github.repository_owner }}/index.json

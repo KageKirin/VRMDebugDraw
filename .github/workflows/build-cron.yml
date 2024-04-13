@@ -44,8 +44,9 @@ jobs:
         source: [github]
         include:
           - source: github
-            registry: https://npm.pkg.github.com/@${{ github.repository_owner }}
-            username: ${{ github.repository_owner }}
+            registry-url: https://npm.pkg.github.com/
+            scope: 'kagekirin'                        #must be lowercase, without '@'
+            username: ${{ github.repository_owner }}  #not lowercase
             token: GH_NPM_TOKEN
     needs: build
     steps:

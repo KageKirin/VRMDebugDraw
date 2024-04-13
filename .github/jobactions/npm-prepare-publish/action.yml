@@ -1,4 +1,8 @@
-name: jobactions/npm-prepare-publish
+name: '[NPM] Prepare for publishing'
+description: >
+  Prepares environment for publishing.
+  Sets up .npmrc and patches package.json with correct registry.
+
 inputs:
   name:
     required: true

@@ -40,7 +40,7 @@ runs:
     with:
       path: ${{ github.workspace }}
       spec: package.json
-      registry: ${{ inputs.registry-url }}
+      registry-url: ${{ inputs.registry-url }}
       scope: ${{ inputs.scope }}
 
   - uses: ./.github/jobactions/build

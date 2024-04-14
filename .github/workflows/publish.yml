@@ -13,7 +13,7 @@ jobs:
         source: [github, npmjs]
         include:
           - source: github
-            registry: https://npm.pkg.github.com/
+            registry-url: https://npm.pkg.github.com/
             scope: 'kagekirin'                        #must be lowercase, without '@'
             username: ${{ github.repository_owner }}  #not lowercase
             token: GH_NPM_TOKEN
@@ -27,7 +27,7 @@ jobs:
     - id: npm-prepare-publish
       uses: ./.github/jobactions/npm-prepare-publish
       with:
-        registry: ${{ matrix.registry }}
+        registry-url: ${{ matrix.registry-url }}
         scope: ${{ matrix.scope }}
         token: ${{ secrets[matrix.token] }}
     - uses: kagekirin/gha-npm/.github/actions/npm-publish@main

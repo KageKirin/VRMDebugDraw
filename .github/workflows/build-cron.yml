@@ -41,13 +41,18 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        source: [github]
+        source: [github, npmjs]
         include:
           - source: github
             registry-url: https://npm.pkg.github.com/
             scope: 'kagekirin'                        #must be lowercase, without '@'
             username: ${{ github.repository_owner }}  #not lowercase
             token: GH_NPM_TOKEN
+          - source: npmjs
+            registry-url: https://registry.npmjs.org/
+            scope: 'kagekirin'                        #must be lowercase, without '@'
+            username: ${{ github.repository_owner }}  #not lowercase
+            token: NPMJS_ORG_TOKEN
     needs: build
     steps:
     - uses: kagekirin/gha-utils/.github/actions/git-checkout-tags@main

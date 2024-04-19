@@ -26,6 +26,6 @@ jobs:
           title: Release ${{ github.action_ref }}
           generate-notes: true
           files: |
-            ${{ steps.npm-pack.outputs.artifacts }}
+            ${{ steps.npm-pack.outputs.package-full }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

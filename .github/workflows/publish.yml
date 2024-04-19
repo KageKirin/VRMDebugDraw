@@ -13,7 +13,7 @@ jobs:
       packages: write # allow GITHUB_TOKEN to publish packages
     strategy:
       matrix:
-        source: [github, npmjs]
+        source: [github]
         include:
           - source: github
             registry-url: https://npm.pkg.github.com/

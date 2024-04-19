@@ -39,6 +39,9 @@ jobs:
 
   test-npm:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # allow GITHUB_TOKEN to publish packages
     strategy:
       matrix:
         source: [github, npmjs]

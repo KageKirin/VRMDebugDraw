@@ -44,20 +44,18 @@ jobs:
   test-npm:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # allow GITHUB_TOKEN to publish packages
     strategy:
       matrix:
-        source: [github, npmjs]
+        source: [github]
         include:
           - source: github
             registry-url: https://npm.pkg.github.com/
             scope: 'kagekirin'                        #must be lowercase, without '@'
             username: ${{ github.repository_owner }}  #not lowercase
-            token: GH_NPM_TOKEN
-          - source: npmjs
-            registry-url: https://registry.npmjs.org/
-            scope: 'kagekirin'                        #must be lowercase, without '@'
-            username: ${{ github.repository_owner }}  #not lowercase
-            token: NPMJS_ORG_TOKEN
+            token: GITHUB_TOKEN
     needs: build
     steps:
     - uses: kagekirin/gha-utils/.github/actions/git-checkout-tags@main

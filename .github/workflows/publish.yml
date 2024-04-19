@@ -41,6 +41,10 @@ jobs:
 
   npm:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # allow GITHUB_TOKEN to publish packages
+      packages: write
     strategy:
       matrix:
         source: [github, npmjs]

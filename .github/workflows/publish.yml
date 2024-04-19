@@ -19,7 +19,7 @@ jobs:
             registry-url: https://npm.pkg.github.com/
             scope: 'kagekirin'                        #must be lowercase, without '@'
             username: ${{ github.repository_owner }}  #not lowercase
-            token: GH_NPM_TOKEN
+            token: GITHUB_TOKEN
     steps:
     - uses: kagekirin/gha-utils/.github/actions/git-checkout-tags@main
     - id: npm-prepare-publish

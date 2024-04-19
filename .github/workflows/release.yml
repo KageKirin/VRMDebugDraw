@@ -1,0 +1,45 @@
+name: release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # allow GITHUB_TOKEN to create releases
+    steps:
+      - uses: kagekirin/gha-utils/.github/actions/git-checkout-tags@main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: latest
+      - id: npm-pack
+        uses: kagekirin/gha-npm/.github/actions/npm-pack@main
+        with:
+          path: ${{ github.workspace }}
+          spec: package.json
+          outdir: ./
+
+      - name: Create release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: Release ${{ github.ref_name }}
+          tag_name: ${{ github.ref }}
+          body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release artifacts
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.npm-pack.outputs.artifacts }}
+          asset_name: ${{ steps.npm-pack.outputs.artifacts }}
+          asset_content_type: application/gzip

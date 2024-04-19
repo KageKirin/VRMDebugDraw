@@ -54,11 +54,6 @@ jobs:
             scope: 'kagekirin'                        #must be lowercase, without '@'
             username: ${{ github.repository_owner }}  #not lowercase
             token: GH_NPM_TOKEN
-          - source: npmjs
-            registry-url: https://registry.npmjs.org/
-            scope: 'kagekirin'                        #must be lowercase, without '@'
-            username: ${{ github.repository_owner }}  #not lowercase
-            token: NPMJS_ORG_TOKEN
     needs: build
     steps:
     - uses: kagekirin/gha-utils/.github/actions/git-checkout-tags@main

@@ -21,25 +21,11 @@ jobs:
           path: ${{ github.workspace }}
           spec: package.json
           outdir: ./
-
-      - name: Create release
-        uses: actions/create-release@v1
-        id: create_release
+      - uses: kagekirin/gha-utils/.github/actions/gh-create-release@main
         with:
-          draft: false
-          prerelease: false
-          release_name: Release ${{ github.ref_name }}
-          tag_name: ${{ github.ref }}
-          body_path: CHANGELOG.md
+          title: Release ${{ github.action_ref }}
+          generate-notes: true
+          files: |
+            ${{ steps.npm-pack.outputs.artifacts }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload release artifacts
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.npm-pack.outputs.artifacts }}
-          asset_name: ${{ steps.npm-pack.outputs.artifacts }}
-          asset_content_type: application/gzip

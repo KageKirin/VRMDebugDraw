@@ -47,7 +47,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        source: [github, npmjs]
+        source: [github]
         include:
           - source: github
             registry-url: https://npm.pkg.github.com/
